@@ -1,0 +1,34 @@
+name: Refresh SEO data
+
+on:
+  schedule:
+    - cron: "30 5 * * 1"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Pull fresh data from Semrush
+        run: node scripts/refresh.mjs
+        env:
+          SEMRUSH_API_KEY: ${{ secrets.SEMRUSH_API_KEY }}
+
+      - name: Commit if changed
+        run: |
+          git config user.name "seo-refresh-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data.js
+          git diff --cached --quiet && echo "No changes" || {
+            git commit -m "Refresh SEO data $(date -u +%Y-%m-%d)"
+            git push
+          }

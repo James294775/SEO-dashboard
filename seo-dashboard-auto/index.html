@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>TNTS Organic Performance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#14181d; --panel:#1c2128; --panel2:#232a33; --line:#2e3742;
+    --text:#e8ebef; --dim:#8b95a1; --faint:#5c6673;
+    --resin:#e8a33d; --resin-dk:#b57a22;
+    --up:#4cc07d; --down:#e05c4f; --hold:#5c8fd6;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;padding-bottom:60px}
+  .wrap{max-width:1280px;margin:0 auto;padding:0 24px}
+
+  /* ---- header spec plate ---- */
+  header{border-bottom:2px solid var(--resin);background:linear-gradient(180deg,#1a1f26 0%,var(--ink) 100%);padding:28px 0 22px;margin-bottom:28px}
+  .plate{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px}
+  .brand-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.22em;color:var(--resin);text-transform:uppercase;margin-bottom:6px}
+  h1{font-family:'Oswald',sans-serif;font-weight:700;font-size:clamp(26px,4vw,40px);letter-spacing:.02em;text-transform:uppercase;line-height:1.05}
+  h1 span{color:var(--resin)}
+  .plate-meta{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--dim);text-align:right}
+  .plate-meta strong{color:var(--text)}
+  .as-stamp{display:inline-flex;flex-direction:column;align-items:center;border:2px solid var(--resin);border-radius:6px;padding:8px 18px;margin-top:8px;background:rgba(232,163,61,.06)}
+  .as-stamp .n{font-family:'Oswald',sans-serif;font-weight:700;font-size:34px;color:var(--resin);line-height:1}
+  .as-stamp .l{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.18em;color:var(--dim);text-transform:uppercase;margin-top:3px}
+
+  /* ---- section headings ---- */
+  h2{font-family:'Oswald',sans-serif;font-weight:600;font-size:19px;letter-spacing:.06em;text-transform:uppercase;margin:38px 0 6px;display:flex;align-items:center;gap:10px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+  .sub{color:var(--dim);font-size:13.5px;margin-bottom:16px}
+
+  /* ---- KPI row ---- */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .kpi .label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+  .kpi .value{font-family:'Oswald',sans-serif;font-weight:600;font-size:34px;margin:4px 0 2px}
+  .kpi .delta{font-size:12.5px;font-family:'IBM Plex Mono',monospace}
+  .pos{color:var(--up)} .neg{color:var(--down)} .neu{color:var(--dim)}
+
+  /* ---- panels & charts ---- */
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+  .panel h3{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:.05em;text-transform:uppercase;margin-bottom:2px}
+  .panel .note{font-size:12.5px;color:var(--dim);margin-bottom:12px}
+  .chartbox{position:relative;height:260px}
+
+  /* ---- tables ---- */
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  td{padding:9px 10px;border-bottom:1px solid #242b34;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td.num,th.num{text-align:right;font-family:'IBM Plex Mono',monospace}
+  .kw{font-weight:500}
+  .url{color:var(--faint);font-size:12px;word-break:break-all}
+  .badge{display:inline-block;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;border-radius:4px;padding:2px 8px;min-width:34px;text-align:center}
+  .b-pos{background:rgba(76,192,125,.14);color:var(--up)}
+  .b-neg{background:rgba(224,92,79,.14);color:var(--down)}
+  .b-neu{background:rgba(139,149,161,.12);color:var(--dim)}
+  .b-gold{background:rgba(232,163,61,.15);color:var(--resin)}
+
+  /* ---- movement columns ---- */
+  .move-head{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+  .move-head .dot{width:9px;height:9px;border-radius:50%}
+  .dot.up{background:var(--up)} .dot.down{background:var(--down)}
+
+  /* ---- task board ---- */
+  .task{display:flex;gap:14px;background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--resin);border-radius:var(--radius);padding:16px 18px;margin-bottom:12px;transition:opacity .2s}
+  .task.p-high{border-left-color:var(--down)}
+  .task.p-med{border-left-color:var(--resin)}
+  .task.p-low{border-left-color:var(--hold)}
+  .task.done{opacity:.45}
+  .task.done .t-title{text-decoration:line-through}
+  .task input[type=checkbox]{width:19px;height:19px;margin-top:2px;accent-color:var(--resin);cursor:pointer;flex-shrink:0}
+  .t-title{font-weight:600;font-size:15px}
+  .t-body{color:var(--dim);font-size:13.5px;margin-top:3px}
+  .t-meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--line);border-radius:4px;padding:2px 8px;color:var(--dim)}
+  .chip.hi{border-color:rgba(224,92,79,.5);color:var(--down)}
+  .chip.md{border-color:rgba(232,163,61,.5);color:var(--resin)}
+  .chip.lo{border-color:rgba(92,143,214,.5);color:var(--hold)}
+
+  footer{margin-top:48px;border-top:1px solid var(--line);padding-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--faint)}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap plate">
+    <div>
+      <div class="brand-eyebrow">Ureka Global · thenamethatsticks.com · UK database</div>
+      <h1>Organic Performance <span>Board</span></h1>
+    </div>
+    <div class="plate-meta">
+      Source <strong>Semrush</strong><br>
+      Data pulled <strong id="pulled"></strong>
+      <div class="as-stamp"><span class="n" id="asVal">18</span><span class="l">Authority Score</span></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- KPI ROW -->
+  <div class="kpis" id="kpis"></div>
+
+  <!-- TRENDS -->
+  <h2>Trends</h2>
+  <p class="sub">Two years of movement. Keywords slipped from the February peak, but the backlink profile has been rebuilding since the low that same month.</p>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Organic keywords &amp; traffic</h3>
+      <p class="note">Monthly ranking keywords (top 100) and estimated organic visits</p>
+      <div class="chartbox"><canvas id="chartOrganic"></canvas></div>
+    </div>
+    <div class="panel">
+      <h3>Referring domains &amp; backlinks</h3>
+      <p class="note">Long decline bottomed out in Feb 2026. Five straight months of growth since.</p>
+      <div class="chartbox"><canvas id="chartLinks"></canvas></div>
+    </div>
+  </div>
+
+  <!-- KEYWORD MOVEMENTS -->
+  <h2>Keyword movements</h2>
+  <p class="sub">Month-on-month changes in Google UK top 100. Green entered or climbed, red dropped out or slipped.</p>
+  <div class="grid2">
+    <div class="panel">
+      <div class="move-head"><span class="dot up"></span><h3>Gained / climbing</h3></div>
+      <table>
+        <thead><tr><th>Keyword</th><th class="num">Pos</th><th class="num">Was</th><th class="num">Vol/mo</th></tr></thead>
+        <tbody id="tblNew"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <div class="move-head"><span class="dot down"></span><h3>Lost / slipping</h3></div>
+      <table>
+        <thead><tr><th>Keyword</th><th class="num">Pos</th><th class="num">Was</th><th class="num">Vol/mo</th></tr></thead>
+        <tbody id="tblLost"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RECOVERY TASKS -->
+  <h2>Recovery tasks</h2>
+  <p class="sub">Generated from this month's data, ordered by traffic upside. Tick them off as they ship. Progress saves on this device.</p>
+  <div id="taskList"></div>
+
+  <!-- TOP KEYWORDS -->
+  <h2>Top ranking keywords</h2>
+  <p class="sub">Sorted by share of organic traffic they bring in.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Keyword</th><th class="num">Pos</th><th class="num">Δ</th><th class="num">Vol/mo</th><th class="num">Traffic %</th><th>Page</th></tr></thead>
+      <tbody id="tblTop"></tbody>
+    </table>
+  </div>
+
+  <!-- CONTENT PERFORMANCE -->
+  <h2>Content performance</h2>
+  <p class="sub">Which pages carry the organic traffic. The Cascamite product page and the advice content do the heavy lifting.</p>
+  <div class="panel">
+    <table>
+      <thead><tr><th>Page</th><th class="num">Keywords</th><th class="num">Traffic</th><th class="num">Share</th></tr></thead>
+      <tbody id="tblPages"></tbody>
+    </table>
+  </div>
+
+  <!-- BACKLINKS -->
+  <h2>Link profile</h2>
+  <div class="grid2">
+    <div class="panel">
+      <h3>Profile snapshot</h3>
+      <p class="note">Current totals from Semrush backlink analytics</p>
+      <table>
+        <tbody id="tblLinkStats"></tbody>
+      </table>
+    </div>
+    <div class="panel">
+      <h3>Top referring domains</h3>
+      <p class="note">By domain authority score</p>
+      <table>
+        <thead><tr><th>Domain</th><th class="num">AS</th><th class="num">Links</th></tr></thead>
+        <tbody id="tblRefs"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <footer>UREKA GLOBAL LTD · ORGANIC PERFORMANCE BOARD · ALL FIGURES SEMRUSH UK DATABASE · AUTO-REFRESHED FROM SEMRUSH · LAST PULL <span id="footPulled"></span></footer>
+</div>
+
+<script src="data.js"></script>
+<script>
+/* ================= DATA (regenerated on each refresh) ================= */
+const DATA = window.SEO_DATA;
+if(!DATA){document.body.innerHTML='<p style="padding:40px;font-family:monospace">data.js failed to load. Run scripts/refresh.mjs or check the last Action run.</p>';throw new Error('no data');}
+
+/* ================= RENDER ================= */
+document.getElementById('pulled').textContent = DATA.pulled;
+document.getElementById('footPulled').textContent = DATA.pulled.toUpperCase();
+document.getElementById('asVal').textContent = DATA.overview.authority;
+const fmt = n => n.toLocaleString("en-GB");
+
+/* KPIs */
+const oh = DATA.organicHistory, lh = DATA.linkHistory;
+const kwPrev = oh[oh.length-1][1], trPrev = oh[oh.length-1][2];
+const rdPrev = lh[lh.length-2][2], blPrev = lh[lh.length-2][1];
+const kpis = [
+  {label:"Organic keywords", value:fmt(DATA.overview.keywords), d:DATA.overview.keywords-kwPrev, suffix:" vs Jun"},
+  {label:"Organic traffic /mo", value:fmt(DATA.overview.traffic), d:DATA.overview.traffic-trPrev, suffix:" vs Jun"},
+  {label:"Referring domains", value:fmt(DATA.overview.refdomains), d:DATA.overview.refdomains-rdPrev, suffix:" vs Jun"},
+  {label:"Backlinks", value:fmt(DATA.overview.backlinks), d:DATA.overview.backlinks-blPrev, suffix:" vs Jun"},
+  {label:"Authority score", value:DATA.overview.authority, d:0, suffix:" held"}
+];
+document.getElementById("kpis").innerHTML = kpis.map(k=>{
+  const cls = k.d>0?"pos":k.d<0?"neg":"neu";
+  const arrow = k.d>0?"▲ +":k.d<0?"▼ ":"—";
+  const dtxt = k.d===0?("— steady"):(arrow+fmt(Math.abs(k.d))+k.suffix);
+  return `<div class="kpi"><div class="label">${k.label}</div><div class="value">${k.value}</div><div class="delta ${cls}">${dtxt}</div></div>`;
+}).join("");
+
+/* Charts */
+Chart.defaults.color = "#8b95a1";
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 10.5;
+const gridCfg = { color:"#242b34" };
+
+new Chart(document.getElementById("chartOrganic"), {
+  type:"line",
+  data:{ labels: oh.map(r=>r[0]).concat(["Jul 26"]),
+    datasets:[
+      {label:"Keywords", data: oh.map(r=>r[1]).concat([DATA.overview.keywords]), borderColor:"#e8a33d", backgroundColor:"rgba(232,163,61,.08)", fill:true, tension:.3, pointRadius:0, borderWidth:2, yAxisID:"y"},
+      {label:"Traffic", data: oh.map(r=>r[2]).concat([DATA.overview.traffic]), borderColor:"#5c8fd6", tension:.3, pointRadius:0, borderWidth:2, yAxisID:"y1"}
+    ]},
+  options:{ maintainAspectRatio:false, interaction:{mode:"index",intersect:false},
+    plugins:{legend:{labels:{boxWidth:10,boxHeight:10}}},
+    scales:{ x:{grid:gridCfg, ticks:{maxTicksLimit:8}},
+      y:{grid:gridCfg, title:{display:true,text:"keywords"}},
+      y1:{position:"right", grid:{drawOnChartArea:false}, title:{display:true,text:"traffic"}} } }
+});
+
+new Chart(document.getElementById("chartLinks"), {
+  type:"line",
+  data:{ labels: lh.map(r=>r[0]),
+    datasets:[
+      {label:"Referring domains", data: lh.map(r=>r[2]), borderColor:"#4cc07d", backgroundColor:"rgba(76,192,125,.08)", fill:true, tension:.3, pointRadius:0, borderWidth:2, yAxisID:"y"},
+      {label:"Backlinks", data: lh.map(r=>r[1]), borderColor:"#8b95a1", borderDash:[4,3], tension:.3, pointRadius:0, borderWidth:1.5, yAxisID:"y1"}
+    ]},
+  options:{ maintainAspectRatio:false, interaction:{mode:"index",intersect:false},
+    plugins:{legend:{labels:{boxWidth:10,boxHeight:10}}},
+    scales:{ x:{grid:gridCfg, ticks:{maxTicksLimit:8}},
+      y:{grid:gridCfg, title:{display:true,text:"domains"}},
+      y1:{position:"right", type:"logarithmic", grid:{drawOnChartArea:false}, title:{display:true,text:"backlinks (log)"}} } }
+});
+
+/* Movement tables */
+const posBadge = (p)=> p==="out" ? `<span class="badge b-neg">OUT</span>` : `<span class="badge b-neu">${p}</span>`;
+document.getElementById("tblNew").innerHTML = DATA.gained.map(r=>
+  `<tr><td class="kw">${r[0]}</td><td class="num"><span class="badge b-pos">${r[1]}</span></td><td class="num">${r[2]}</td><td class="num">${fmt(r[3])}</td></tr>`).join("");
+document.getElementById("tblLost").innerHTML = DATA.lost.map(r=>
+  `<tr><td class="kw">${r[0]}</td><td class="num">${posBadge(r[1])}</td><td class="num">${r[2]}</td><td class="num">${fmt(r[3])}</td></tr>`).join("");
+
+/* Tasks with device-local persistence */
+const done = new Set(JSON.parse(localStorage.getItem("tnts_tasks_done")||"[]"));
+const pName = {high:"High",med:"Medium",low:"Low"}, pChip={high:"hi",med:"md",low:"lo"};
+document.getElementById("taskList").innerHTML = DATA.tasks.map(t=>`
+  <label class="task p-${t.p} ${done.has(t.id)?"done":""}" for="${t.id}">
+    <input type="checkbox" id="${t.id}" ${done.has(t.id)?"checked":""}>
+    <div>
+      <div class="t-title">${t.title}</div>
+      <div class="t-body">${t.body}</div>
+      <div class="t-meta"><span class="chip ${pChip[t.p]}">${pName[t.p]} priority</span>${t.chips.map(c=>`<span class="chip">${c}</span>`).join("")}</div>
+    </div>
+  </label>`).join("");
+document.getElementById("taskList").addEventListener("change", e=>{
+  if(e.target.type!=="checkbox") return;
+  e.target.checked ? done.add(e.target.id) : done.delete(e.target.id);
+  localStorage.setItem("tnts_tasks_done", JSON.stringify([...done]));
+  e.target.closest(".task").classList.toggle("done", e.target.checked);
+});
+
+/* Top keywords */
+document.getElementById("tblTop").innerHTML = DATA.topKeywords.map(r=>{
+  const d = r[2], dCls = d>0?"b-pos":d<0?"b-neg":"b-neu", dTxt = d>0?"+"+d:(d<0?d:"–");
+  const pCls = r[1]<=3?"b-gold":"b-neu";
+  return `<tr><td class="kw">${r[0]}</td><td class="num"><span class="badge ${pCls}">${r[1]}</span></td><td class="num"><span class="badge ${dCls}">${dTxt}</span></td><td class="num">${fmt(r[3])}</td><td class="num">${r[4].toFixed(1)}%</td><td class="url">${r[5]}</td></tr>`;
+}).join("");
+
+/* Pages */
+document.getElementById("tblPages").innerHTML = DATA.pages.map(r=>
+  `<tr><td class="url" style="color:var(--text)">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${fmt(r[2])}</td><td class="num">${r[3].toFixed(1)}%</td></tr>`).join("");
+
+/* Link stats */
+const ls = DATA.overview;
+document.getElementById("tblLinkStats").innerHTML = [
+  ["Total backlinks", fmt(ls.backlinks)],
+  ["Referring domains", fmt(ls.refdomains)],
+  ["Referring IPs", fmt(ls.referringIPs)],
+  ["Follow links", fmt(ls.follows)+" ("+Math.round(ls.follows/(ls.follows+ls.nofollows)*100)+"%)"],
+  ["Nofollow links", fmt(ls.nofollows)+" ("+(100-Math.round(ls.follows/(ls.follows+ls.nofollows)*100))+"%)"],
+  ["Authority score", ls.authority],
+  ["Trust score", ls.trustScore]
+].map(r=>`<tr><td>${r[0]}</td><td class="num" style="font-weight:600">${r[1]}</td></tr>`).join("");
+
+/* Referring domains */
+document.getElementById("tblRefs").innerHTML = DATA.refdomains.map(r=>
+  `<tr><td class="kw">${r[0]}</td><td class="num"><span class="badge ${r[1]>=50?"b-gold":"b-neu"}">${r[1]}</span></td><td class="num">${r[2]}</td></tr>`).join("");
+</script>
+</body>
+</html>
